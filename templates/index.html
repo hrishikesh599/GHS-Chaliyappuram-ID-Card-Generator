@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ID Card Generator · {{ school.name }}</title>
+  <style>
+  {% for key, f in fonts.items() %}@font-face { font-family: '{{ f[1] }}'; font-weight: {{ f[2] }}; font-display: block;
+    src: url('{{ url_for("static", filename="fonts/" ~ f[0] ~ ".ttf") }}') format('truetype'); }
+  {% endfor %}
+</style>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">
+      <b>GHS</b>
+      <img src="{{ url_for('branding', asset='logo') }}" alt="" onerror="this.remove()">
+    </span>
+    <div>
+      <h1>{{ school.name }}</h1>
+      <p>Student Identity Card Generator</p>
+    </div>
+  </div>
+  <span class="pill">Runs locally &middot; nothing is stored</span>
+</header>
+
+<main class="layout">
+
+  <!-- ============ FORM ============ -->
+  <section class="panel form-panel">
+    <h2>Student details</h2>
+    <p class="sub">Fill in the details and upload a photo. The card updates as you type.</p>
+
+    <form id="idForm" novalidate autocomplete="off">
+      <div class="grid">
+        <div class="field span2">
+          <label for="name">Student name</label>
+          <input id="name" name="name" type="text" maxlength="40" placeholder="e.g. Fathima Nasrin K">
+          <small class="err" data-err="name"></small>
+        </div>
+
+        <div class="field">
+          <label for="admission_no">Admission number</label>
+          <input id="admission_no" name="admission_no" type="text" maxlength="15" placeholder="e.g. 4821">
+          <small class="err" data-err="admission_no"></small>
+        </div>
+
+        <div class="field">
+          <label for="academic_year">Academic year</label>
+          <input id="academic_year" name="academic_year" type="text" maxlength="9" value="{{ academic_year }}">
+          <small class="err" data-err="academic_year"></small>
+        </div>
+
+        <div class="field">
+          <label for="student_class">Class</label>
+          <select id="student_class" name="student_class">
+            <option value="">Select</option>
+            {% for c in classes %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          </select>
+          <small class="err" data-err="student_class"></small>
+        </div>
+
+        <div class="field">
+          <label for="division">Division</label>
+          <select id="division" name="division">
+            <option value="">Select</option>
+            {% for d in divisions %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+          <small class="err" data-err="division"></small>
+        </div>
+
+        <div class="field">
+          <label for="guardian">Guardian</label>
+          <input id="guardian" name="guardian" type="text" maxlength="40" placeholder="Parent / guardian name">
+          <small class="err" data-err="guardian"></small>
+        </div>
+
+        <div class="field">
+          <label for="mobile">Mobile</label>
+          <input id="mobile" name="mobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number">
+          <small class="err" data-err="mobile"></small>
+        </div>
+
+        <div class="field span2">
+          <label for="locality">Locality</label>
+          <input id="locality" name="locality" type="text" maxlength="40" placeholder="e.g. Chaliyappuram">
+          <small class="err" data-err="locality"></small>
+        </div>
+
+        <div class="field span2">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" rows="3" maxlength="140" placeholder="House name, place, post office, PIN"></textarea>
+          <small class="err" data-err="address"></small>
+        </div>
+
+        <div class="field span2">
+          <label>Student photo</label>
+          <label class="drop" id="drop" for="photo">
+            <span class="thumb"><img id="thumb" alt=""><i id="thumbIcon">+</i></span>
+            <span class="drop-text">
+              <strong id="dropTitle">Choose or drop a photo</strong>
+              <em>Passport-style, face centred. JPG, PNG or WEBP, up to 8&nbsp;MB.</em>
+            </span>
+          </label>
+          <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <small class="err" data-err="photo"></small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn ghost" id="resetBtn">Clear</button>
+        <button type="submit" class="btn primary" id="genBtn">Generate PDF</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ PREVIEW ============ -->
+  <section class="panel preview-panel">
+    <h2>Live preview</h2>
+    <p class="sub">Front and back, shown to scale (54 &times; 85.6&nbsp;mm).</p>
+
+    <div class="cards">
+
+      <!-- FRONT -->
+      <figure>
+        <div class="idcard">{{ front_svg|safe }}</div>
+        <figcaption>Front</figcaption>
+      </figure>
+
+      <!-- BACK -->
+      <figure>
+        <div class="idcard">{{ back_svg|safe }}</div>
+        <figcaption>Back</figcaption>
+      </figure>
+
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="credit">Designed &amp; developed by {{ credit }}</span>
+</footer>
+
+<!-- ============ PDF DIALOG ============ -->
+<dialog id="pdfDialog">
+  <div class="dlg-head">
+    <h3>ID card ready</h3>
+    <button type="button" class="x" id="closeDlg" aria-label="Close">&times;</button>
+  </div>
+  <iframe id="pdfFrame" title="Generated ID card"></iframe>
+  <div class="dlg-actions">
+    <a class="btn ghost" id="openBtn" target="_blank" rel="noopener">Open to print</a>
+    <a class="btn primary" id="dlBtn">Download PDF</a>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>window.CARD_DESIGN = {{ d|tojson }};</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
