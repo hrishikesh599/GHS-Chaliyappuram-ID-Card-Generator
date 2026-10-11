@@ -1,0 +1,170 @@
+/* ==========================================================================
+   GHS Chaliyappuram - ID Card Generator
+   ========================================================================== */
+:root {
+  --navy: #0B2545;
+  --navy-2: #123461;
+  --gold: #C9A24B;
+  --gold-soft: #F3E9CF;
+  --paper: #FBFAF6;
+  --ink: #1F2937;
+  --muted: #6B7280;
+  --line: #E6E1D3;
+  --danger: #B42318;
+  --radius: 14px;
+  --card-zoom: 1.45;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  background:
+    radial-gradient(900px 400px at 85% -10%, rgba(201,162,75,.16), transparent 60%),
+    radial-gradient(700px 380px at -5% 0%, rgba(11,37,69,.10), transparent 60%),
+    #F6F4EE;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--navy);
+  border-bottom: 3px solid var(--gold);
+  color: #fff;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand h1 { margin: 0; font-size: 18px; letter-spacing: .14em; font-weight: 700; }
+.brand p  { margin: 2px 0 0; font-size: 12px; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; }
+.brand-mark {
+  position: relative; width: 44px; height: 44px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--gold); overflow: hidden;
+  display: grid; place-items: center; color: var(--navy); font-size: 13px;
+}
+.brand-mark img { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); object-fit: contain; background: #fff; border-radius: 50%; }
+.pill {
+  font-size: 12px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+}
+
+/* ---------- layout ---------- */
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(340px, 480px) 1fr;
+  gap: 28px;
+  padding: 28px 32px;
+  max-width: 1280px; width: 100%; margin: 0 auto;
+  align-items: start;
+}
+.panel {
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 26px; box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 32px -12px rgba(11,37,69,.12);
+}
+.panel h2 { margin: 0; font-size: 20px; color: var(--navy); font-family: "Playfair GHS", Georgia, "Times New Roman", serif; }
+.panel .sub { margin: 4px 0 20px; color: var(--muted); font-size: 13.5px; }
+
+/* ---------- form ---------- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+.span2 { grid-column: span 2; }
+.field label:not(.drop) { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #374151; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 11px 12px; font: inherit; font-size: 14.5px; color: var(--ink);
+  background: #FCFCFA; border: 1px solid #D8D3C4; border-radius: 10px; outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.field textarea { resize: vertical; min-height: 78px; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--gold); background: #fff; box-shadow: 0 0 0 3px rgba(201,162,75,.22);
+}
+.field.invalid input, .field.invalid select, .field.invalid textarea, .field.invalid .drop { border-color: var(--danger); }
+.err { display: block; min-height: 0; margin-top: 4px; font-size: 12px; color: var(--danger); }
+.err:empty { display: none; }
+
+.drop {
+  display: flex; align-items: center; gap: 14px; padding: 12px;
+  border: 1.5px dashed #CDBF95; border-radius: 12px; background: #FDFBF4; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.drop:hover, .drop.over { background: var(--gold-soft); border-color: var(--gold); }
+.thumb {
+  position: relative; flex: none; width: 54px; height: 70px; border-radius: 8px; overflow: hidden;
+  background: #EFE9D6; display: grid; place-items: center; color: var(--gold); font-size: 26px; font-style: normal;
+}
+.thumb i { font-style: normal; }
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: none; }
+.thumb.has img { display: block; }
+.thumb.has i { display: none; }
+.drop-text strong { display: block; font-size: 14px; color: var(--navy); }
+.drop-text em { display: block; margin-top: 3px; font-style: normal; font-size: 12px; color: var(--muted); }
+
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.btn {
+  appearance: none; border: 1px solid transparent; border-radius: 10px; padding: 11px 20px;
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform .08s, box-shadow .15s, background .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--navy); color: #fff; box-shadow: 0 6px 16px -6px rgba(11,37,69,.6); }
+.btn.primary:hover { background: var(--navy-2); }
+.btn.primary[disabled] { opacity: .65; cursor: progress; }
+.btn.ghost { background: #fff; border-color: #D8D3C4; color: var(--navy); }
+.btn.ghost:hover { background: #F7F4EA; }
+
+/* ---------- preview ---------- */
+.cards { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; padding: 10px 0 4px; }
+.cards figure { margin: 0; text-align: center; }
+.cards figcaption { margin-top: 14px; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+
+/* The card preview is an SVG drawn in real millimetres (see services/card_svg.py), then zoomed. */
+.idcard {
+  position: relative; width: 54mm; height: 85.6mm; overflow: hidden; text-align: left;
+  border-radius: 3.1mm; zoom: var(--card-zoom); line-height: 0;
+  box-shadow: 0 0 0 .5px rgba(0,0,0,.12), 0 14px 28px -10px rgba(11,37,69,.45);
+}
+.idsvg { display: block; width: 100%; height: 100%; }
+
+/* ---------- footer credit (deliberately quiet) ---------- */
+.foot { text-align: center; padding: 18px 16px 24px; }
+.credit { font-size: 11px; letter-spacing: .08em; color: #9A9788; opacity: .75; transition: opacity .2s, color .2s; }
+.credit:hover { opacity: 1; color: var(--navy); }
+
+/* ---------- dialog ---------- */
+dialog {
+  width: min(920px, 94vw); height: min(86vh, 760px); padding: 0; border: 0; border-radius: 16px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.5);
+}
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: rgba(11,37,69,.55); backdrop-filter: blur(3px); }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.dlg-head h3 { margin: 0; color: var(--navy); font-family: Georgia, serif; }
+.x { border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: var(--muted); }
+dialog iframe { flex: 1; width: 100%; border: 0; background: #EEE; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--line); }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--navy); color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 14px;
+  transition: opacity .2s, transform .2s; z-index: 50;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.bad { background: var(--danger); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; padding: 18px 16px; }
+  .topbar { padding: 14px 16px; }
+  .pill { display: none; }
+}
+@media (max-width: 480px) {
+  :root { --card-zoom: 1.2; }
+  .grid { grid-template-columns: 1fr; }
+  .span2 { grid-column: auto; }
+}
